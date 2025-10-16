@@ -9,28 +9,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-      os: [ubuntu-latest, macos-latest, windows-latest]
-      python-version:
-        - "3.12"
 
-  name: tests
-  runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.12"]
+    
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flask==2.3.3
-        pip install pytest==7.4.2
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask==2.3.3
+          pip install pytest==7.4.2
 
-
-    - name: Run tests
-      run: pytest
+      - name: Run requirement tests
+        run: |
+          pytest R1_test.py R2_test.py R3_test.py R4_test.py R5_test.py R6_test.py R7_test.py
