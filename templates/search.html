@@ -7,18 +7,22 @@
 <form method="GET" action="{{ url_for('search.search_books') }}">
     <div class="form-group">
         <label for="q">Search Term</label>
-        <input type="text" id="q" name="q" value="{{ search_term }}" required>
-        <small style="color: #666;">Enter title, author, or ISBN to search</small>
+        <input type="text" id="q" name="q" value="{{ search_term }}" 
+               required 
+               maxlength="200">
+        <small id="searchHint" style="color: #666;">Enter search term based on selected type</small>
     </div>
     
     <div class="form-group">
         <label for="type">Search Type</label>
-        <select id="type" name="type">
+        <select id="type" name="type" onchange="switchInputBox()">
             <option value="title" {{ 'selected' if search_type == 'title' else '' }}>Title (partial match)</option>
             <option value="author" {{ 'selected' if search_type == 'author' else '' }}>Author (partial match)</option>
-            <option value="isbn" {{ 'selected' if search_type == 'isbn' else '' }}>ISBN (exact match)</option>
+            <option value="isbn" {{ 'selected' if search_type == 'isbn' else '' }}>ISBN (13 digits only)</option>
         </select>
     </div>
+
+  
     
     <div class="form-group">
         <button type="submit" class="btn">🔍 Search</button>
@@ -61,7 +65,7 @@
                         {% if book.available_copies > 0 %}
                             <form method="POST" action="{{ url_for('borrowing.borrow_book') }}" style="display: inline;">
                                 <input type="hidden" name="book_id" value="{{ book.id }}">
-                                <input type="text" name="patron_id" placeholder="Patron ID" 
+                                <input type="text" name="patron_id" placeholder="Patron ID" oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                                        pattern="[0-9]{6}" maxlength="6" required style="width: 100px; margin-right: 5px;">
                                 <button type="submit" class="btn btn-success">Borrow</button>
                             </form>
@@ -81,14 +85,46 @@
     {% endif %}
 {% endif %}
 
-<div style="margin-top: 30px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
-    <h4>⚠️ Not Yet Implemented</h4>
-    <p>The search functionality is currently under development. It should support:</p>
-    <ul>
-        <li><strong>Title search:</strong> Partial matching, case-insensitive</li>
-        <li><strong>Author search:</strong> Partial matching, case-insensitive</li>
-        <li><strong>ISBN search:</strong> Exact matching</li>
-        <li>Return results in the same format as the main catalog</li>
-    </ul>
-</div>
+<!-- <div style="margin-top: 30px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;"> -->
+    <!-- <h4>⚠️ Not Yet Implemented</h4> -->
+    <!-- <p>The search functionality is currently under development. It should support:</p> -->
+    <!-- <ul> -->
+        <!-- <li><strong>Title search:</strong> Partial matching, case-insensitive</li> -->
+        <!-- <li><strong>Author search:</strong> Partial matching, case-insensitive</li> -->
+        <!-- <li><strong>ISBN search:</strong> Exact matching</li> -->
+        <!-- <li>Return results in the same format as the main catalog</li> -->
+    <!-- </ul> -->
+<!-- </div> -->
+
+  <script>
+        function switchInputBox() {
+            const searchInput = document.getElementById('q');
+            const searchType = document.getElementById('type').value;
+            
+            // Reset
+            searchInput.removeAttribute('pattern');
+            searchInput.removeAttribute('maxlength');
+            searchInput.value = '';
+            
+            if (searchType === 'isbn') {
+                searchInput.setAttribute('pattern', '[0-9]{13}');
+                searchInput.setAttribute('maxlength', '13');
+                searchInput.setAttribute('oninput', 'this.value = this.value.replace(/[^0-9]/g, "")');
+
+            } else if (searchType === 'title') {
+                searchInput.setAttribute('maxlength', '200');
+                searchInput.removeAttribute('pattern');
+                searchInput.removeAttribute('oninput');
+              
+            } else {
+                searchInput.setAttribute('maxlength', '100');
+                searchInput.removeAttribute('pattern');
+                searchInput.removeAttribute('oninput');
+    
+            }
+        }
+        
+        // Run validation on page load
+        document.addEventListener('DOMContentLoaded', switchInputBox);
+    </script>
 {% endblock %}

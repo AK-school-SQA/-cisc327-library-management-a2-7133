@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Patron Status</h2>
+    
+    <form id="patronForm" class="mb-4">
+        <div class="form-group">
+            <label for="patron_id">Patron ID (6 digits):</label>
+            <input type="text" class="form-control" id="patron_id" name="patron_id" 
+                   pattern="[0-9]{6}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-success">Get Status</button>
+    </form>
+    <div id="statusResults" style="display: none;">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Summary</h4>
+                <p>Currently Borrowed Books: <span id="borrowedCount">0</span></p>
+                <p>Total Late Fees: $<span id="totalFees">0.00</span></p>
+                <p>Overdue Books: <span id="overdueCount">0</span></p>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Currently Borrowed Books</h4>
+            </div>
+            <div class="card-body">
+                <div id="currentlyBorrowed">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="currentBorrowsList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message Display -->
+    <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+</div>
+
+<script>
+document.getElementById('patronForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const patronId = document.getElementById('patron_id').value;
+    
+    try {
+        const response = await fetch(`/api/patron/${patronId}/status`);
+        const data = await response.json();
+        
+        if (data.error) {
+            document.getElementById('errorMessage').textContent = data.error;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('statusResults').style.display = 'none';
+            return;
+        }
+        
+        // Update summary information
+        document.getElementById('borrowedCount').textContent = data.currently_borrowed.length;
+        document.getElementById('totalFees').textContent = data.total_fees_due.toFixed(2);
+        document.getElementById('overdueCount').textContent = data.books_overdue;
+        
+        // Update currently borrowed books table
+        const borrowedList = document.getElementById('currentBorrowsList');
+        borrowedList.innerHTML = '';
+        
+        data.currently_borrowed.forEach(book => {
+            const row = document.createElement('tr');
+            const dueDate = new Date(book.due_date);
+            const today = new Date();
+            const isOverdue = dueDate < today;
+            
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${new Date(book.due_date).toLocaleDateString()}</td>
+                <td>${isOverdue ? '<span class="text-danger">Overdue</span>' : 'On Time'}</td>
+            `;
+            borrowedList.appendChild(row);
+        });
+        
+        // Show results and hide error message
+        document.getElementById('statusResults').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        
+    } catch (error) {
+        document.getElementById('errorMessage').textContent = 'An error occurred while fetching patron status.';
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('statusResults').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

@@ -184,15 +184,32 @@ def update_book_availability(book_id: int, change: int) -> bool:
         conn.close()
         return False
 
-def update_borrow_record_return_date(patron_id: str, book_id: int, return_date: datetime) -> bool:
+def update_borrow_record_return_date(patron_id: str, book_id: int, due_date: datetime, return_date: datetime) -> bool:
     """Update the return date for a borrow record."""
     conn = get_db_connection()
     try:
+        # First get the record with the earliest due date that hasn't been returned
+        record = conn.execute('''
+            SELECT id FROM borrow_records 
+            WHERE patron_id = ? 
+            AND book_id = ? 
+            AND due_date = ?
+            AND return_date IS NULL
+            ORDER BY due_date ASC
+            LIMIT 1
+        ''', (patron_id, book_id, due_date.isoformat())).fetchone() #GETTING SPECIFIC DUE DATE OF BOOK ID
+        
+        if not record:
+            conn.close()
+            return False
+            
+        # Update only this specific record
         conn.execute('''
             UPDATE borrow_records 
             SET return_date = ? 
-            WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
-        ''', (return_date.isoformat(), patron_id, book_id))
+            WHERE id = ?
+        ''', (return_date.isoformat(), record['id']))
+        
         conn.commit()
         conn.close()
         return True
