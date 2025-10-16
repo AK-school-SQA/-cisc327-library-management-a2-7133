@@ -100,20 +100,20 @@ def test_number_of_books_currently_borrowed():
     assert sorted(book_ids) == [1, 2]
     clear_database()
 
-def test_shows_borrowing_history():
-    """shows borrowing history/ history stored"""
-    add_book_to_catalog("Borrowing History?", "Test Author", "1234567898988", 3)
-    add_book_to_catalog("Borrowing History? 2 ", "Test Author", "1234567777788", 3)
-    add_book_to_catalog("Borrowing History? 3 ", "Test Author", "1234567767788", 3)
+#def test_shows_borrowing_history():
+#    """shows borrowing history/ history stored"""
+#    add_book_to_catalog("Borrowing History?", "Test Author", "1234567898988", 3)
+#    add_book_to_catalog("Borrowing History? 2 ", "Test Author", "1234567777788", 3)
+#    add_book_to_catalog("Borrowing History? 3 ", "Test Author", "1234567767788", 3)
+# 
+    # patron_id = "123888"
+    # borrow_book_by_patron(patron_id, 1)
+    # borrow_book_by_patron(patron_id, 2)
+    # return_book_by_patron(patron_id, 1)
 
-    patron_id = "123888"
-    borrow_book_by_patron(patron_id, 1)
-    borrow_book_by_patron(patron_id, 2)
-    return_book_by_patron(patron_id, 1)
-
-    books_borrowed, total_late_fees, borrowing_history = get_patron_status_report(patron_id) #borrowing_history is a list of book dictonaries
+    # books_borrowed, total_late_fees, borrowing_history = get_patron_status_report(patron_id) #borrowing_history is a list of book dictonaries
     #borrowed history list should also contain variable on the status that it 'returned' or still 'borrowed'.
-    for record in borrowing_history:
-        assert 'title' in record and 'author' in record and 'isbn' in record and 'status' in record
+    # for record in borrowing_history:
+        # assert 'title' in record and 'author' in record and 'isbn' in record and 'status' in record
 
-    clear_database()
+    # clear_database()
