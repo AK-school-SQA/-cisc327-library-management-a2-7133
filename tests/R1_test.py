@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import Mock
 from services.library_service import (
     add_book_to_catalog
 )
@@ -6,15 +7,24 @@ from services.library_service import (
 from clearDB import clear_database
 clear_database()
 
-def test_add_book_valid_input_all_fields():
-    """Test adding a book with valid input."""
+def test_add_book_valid_input_all_fields(mocker):
+    """Test adding a book with valid input"""
+    mocker.patch(
+        'services.library_service.get_book_by_isbn',
+        return_value=None
+    )
+    mocker.patch(
+        'services.library_service.insert_book',
+        return_value=True
+    )
+    
     success, message = add_book_to_catalog("Test Book", "Test Author", "1234567890123", 5)
     
     assert success == True
     assert "successfully added" in message
 
 def test_add_book_invalid_isbn_too_short():
-    """Test adding a book with ISBN too short."""
+    """Test adding a book with ISBN too short"""
     success, message = add_book_to_catalog("Test Book", "Test Author", "1234567897", 5)
     
     assert success == False
@@ -29,9 +39,13 @@ def test_add_book_invalid_isbn_too_long():
     assert "13 digits" in message
     clear_database()
 
-def test_add_book_invalid_duplicate_isbn():
+def test_add_book_invalid_duplicate_isbn(mocker):
     """Test adding a book with an isbn value that also exists in the catalog"""
-    add_book_to_catalog("Test Book 2", "Test Author", "1234567890129", 5)
+    mocker.patch(
+        'services.library_service.get_book_by_isbn',
+        return_value={'id': 1, 'title': 'Existing Book', 'isbn': '1234567890129', 'author': 'Author', 'total_copies': 5, 'available_copies': 5}
+    )
+    
     success, message = add_book_to_catalog("Test Book", "Test Author", "1234567890129", 5)
 
     assert success == False

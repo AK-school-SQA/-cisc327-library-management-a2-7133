@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, render_template
-from library_service import get_patron_status_report
+from services.library_service import get_patron_status_report
 
 #MY API ATTEMPT No.4!
 patron_bp = Blueprint('patron', __name__)
