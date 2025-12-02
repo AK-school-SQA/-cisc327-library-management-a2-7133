@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import Mock
 from services.library_service import (
     add_book_to_catalog,
     search_books_in_catalog
