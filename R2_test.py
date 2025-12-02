@@ -1,5 +1,5 @@
 import pytest
-from library_service import (
+from services.library_service import (
     add_book_to_catalog, borrow_book_by_patron, return_book_by_patron, get_patron_borrowed_books,
     get_patron_borrow_count, get_book_by_id, get_book_by_isbn, get_all_books, get_patron_status_report
 
